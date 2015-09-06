@@ -18,6 +18,7 @@ stderr
 local IO = {}
 local IOFile = {}
 
+
 --TODO: check std error strings
 function IO.open ( path, mode )
 	local ret = {}
@@ -71,11 +72,34 @@ function IO.type ( ... )
 end
 
 
+
+--TODO: test argument defaults
+--TODO: check how settings the position outside the file works
+--success: currentPos
+--fail: nil + errstr
 function IO.seek ( file, whence, offset )
+	--TODO: enforce append/update options
 	local twhence, toffset = type ( whence ), type ( offset )
+	local err = 'invalid arguments'
 	if twhence == 'nil' then
 		if toffset == 'number' then
-			whence
+			whence = offset
+		else
+			return nil, err
+		end
+	end
+	offset = offset or 0
+	whence = whence or 'cur'
+	if whence == 'set' then
+		file.file.pos = offset
+	elseif whence == 'cur' then
+		file.file.pos = file.file.pos + offset
+	elseif whence == 'end' then
+		file.file.pos = file.file.size + offset
+	else
+		return nil, err
+	end
+	return file.file.pos
 end
 
 
